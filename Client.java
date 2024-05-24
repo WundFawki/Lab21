@@ -1,4 +1,4 @@
-package Lab_21;
+package Lab_22;
 
 import javax.swing.*;
 import javax.swing.plaf.BorderUIResource;

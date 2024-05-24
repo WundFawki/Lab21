@@ -1,4 +1,4 @@
-package Lab_21;
+package Lab_22;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -38,6 +38,15 @@ public class MyServer {
             }
         }
         return false;
+    }
+
+    public synchronized ClientHandler clientFromNick(String name){
+        for(ClientHandler o: clients){
+            if(name.equals(o.getName())) {
+                return o;
+            }
+        }
+        return null;
     }
     public synchronized void broadcastMsg(String msg){
         for(ClientHandler o: clients){

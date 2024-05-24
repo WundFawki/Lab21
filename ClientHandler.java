@@ -1,4 +1,4 @@
-package Lab_21;
+package Lab_22;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.*;
 
 public class ClientHandler{
         private MyServer myServer;
@@ -77,7 +78,54 @@ public class ClientHandler{
                     // message parts[1]
                     myServer.broadcastPrivateMsg(parts[1],parts[2], name);
                 }
+                else if(strFromClient.startsWith("/changenick")){
+                    String[] parts = strFromClient.split(" ");
+                    try {
+                        Class.forName("org.sqlite.JDBC");
+                        Connection connection = DriverManager.getConnection("jdbc:sqlite:D:\\sqlite\\new.db");
+                        PreparedStatement stmt = connection.prepareStatement("UPDATE users SET nickname = ? WHERE nickname = ?");
+                        stmt.setString(1,parts[1]);
+                        stmt.setString(2,name);
+                        stmt.executeUpdate();
+                        name = parts[1];
+                        connection.close();
+                    }catch (SQLException | ClassNotFoundException e){
+                        e.printStackTrace();
+                    }
+                }
+                else if(strFromClient.startsWith("/adduser") && name.equals("admin")){
+                    String[] parts = strFromClient.split(" ");
+                    try {
+                        Class.forName("org.sqlite.JDBC");
+                        Connection connection = DriverManager.getConnection("jdbc:sqlite:D:\\sqlite\\new.db");
+                        PreparedStatement stmt = connection.prepareStatement("INSERT INTO users(login,password,nickname) VALUES(?,?,?)");
+                        stmt.setString(1,parts[1]);
+                        stmt.setString(2,parts[2]);
+                        stmt.setString(3,parts[3]);
+                        stmt.executeUpdate();
+                        connection.close();
+                    }catch (SQLException | ClassNotFoundException e){
+                        e.printStackTrace();
+                    }
+                }else if(strFromClient.startsWith("/deluser") && name.equals("admin")){
+                    String[] parts = strFromClient.split(" ");
+                    if(myServer.isNickBusy(parts[1])){
+                            ClientHandler o = myServer.clientFromNick(parts[1]);
+                            o.closeConnection();
+                    }
+                    try {
+                        Class.forName("org.sqlite.JDBC");
+                        Connection connection = DriverManager.getConnection("jdbc:sqlite:D:\\sqlite\\new.db");
+                        PreparedStatement stmt = connection.prepareStatement("DELETE FROM users WHERE nickname = ?");
+                        stmt.setString(1,parts[1]);
+                        stmt.executeUpdate();
+                        connection.close();
+                    }catch (SQLException | ClassNotFoundException e){
+                        e.printStackTrace();
+                    }
+                }
                 else if(strFromClient.equals("/end")){
+                    closeConnection();
                     return;
                 }
                 else {
@@ -86,7 +134,6 @@ public class ClientHandler{
                 }
             }
         }
-
         public void sendMsg(String msg){
             try {
                 out.writeUTF(msg);

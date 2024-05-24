@@ -1,4 +1,4 @@
-package Lab_21;
+package Lab_22;
 
 public class ServerApp {
     public static void main(String[] args){

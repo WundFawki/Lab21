@@ -1,4 +1,4 @@
-package Lab_21;
+package Lab_22;
 
 public interface AuthService {
     void start();
